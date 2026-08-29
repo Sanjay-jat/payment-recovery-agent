@@ -11,7 +11,8 @@ with open("payments.json") as f:
     payments = json.load(f)
 
 # pick a soft-decline record and a hard-decline record to test both paths
-sample = payments[0]  # change index to test different records
+sample = next(p for p in payments if p["decline_code"] in
+    ("CARD_EXPIRED", "INVALID_VPA", "RISK_FRAUD_BLOCK", "CARD_REPORTED_LOST_STOLEN", "MANDATE_NOT_REGISTERED"))  # change index to test different records
 
 initial_state = {
     "payment_id": sample["payment_id"],
