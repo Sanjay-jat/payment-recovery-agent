@@ -14,3 +14,5 @@ already includes the UTC offset.
 Note: full 200-record batch takes several minutes because ~half the records
 route through an Ollama LLM call (message generation) sequentially on CPU.
 This is expected batch-processing behavior, not a bug.
+
+Bug: had two get_audit_trail functions defined for the same route — the older one (returning a flat list) silently took precedence over the new summary+steps version. Fixed by removing the duplicate."
