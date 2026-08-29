@@ -91,3 +91,43 @@ def get_audit_trail(payment_id: str):
         ]
     finally:
         db.close()
+def generate_summary(logs: list[dict]) -> str:
+    """Turn the raw audit trail into one plain-English sentence."""
+    text = " ".join(l["message"] for l in logs)
+
+    if "hard" in text.lower() and "will not retry" in text.lower():
+        reason = "the payment method itself is invalid or expired"
+    elif "one-time payment" in text.lower():
+        reason = "it was a one-time payment with no saved method to retry"
+    elif "opted out" in text.lower():
+        reason = "the customer had opted out of being contacted"
+    elif "recovered" in text.lower():
+        reason = "a retry succeeded"
+    elif "retry limit reached" in text.lower():
+        reason = "all retry attempts were used up"
+    else:
+        reason = "of the rules below"
+
+    final_status = logs[-1]["message"] if logs else ""
+    return f"This payment ended up '{final_status.split(':')[-1].strip()}' because {reason}."
+
+@app.get("/payments/{payment_id}/audit")
+def get_audit_trail(payment_id: str):
+    db = SessionLocal()
+    try:
+        logs = (
+            db.query(AuditLog)
+            .filter_by(payment_id=payment_id)
+            .order_by(AuditLog.created_at)
+            .all()
+        )
+        steps = [
+            {"node": log.node_name, "message": log.message, "at": log.created_at.isoformat()}
+            for log in logs
+        ]
+        return {
+            "summary": generate_summary(steps),
+            "steps": steps,
+        }
+    finally:
+        db.close()
