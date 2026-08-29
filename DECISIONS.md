@@ -4,3 +4,4 @@ which cut the loop before decide_action could route to send_message.
 Fix: should_continue now only checks status == "pending"; decide_action already
 handles routing to send_message once retries are exhausted, so the loop naturally
 terminates once status changes.
+"Local Windows Postgres was already occupying port 5432, causing password auth to hit the wrong server. Moved Docker Postgres to port 5433 to avoid conflict."
