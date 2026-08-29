@@ -30,7 +30,7 @@ def generate(n: int, seed: int) -> list[dict]:
             "amount": round(random.uniform(199, 15000), 2),
             "channel": random.choice(CHANNELS),
             "decline_code": code,
-            "failed_at": failed_at.isoformat() + "Z",
+            "failed_at": failed_at.isoformat(),
             "retry_count": 0,
             "status": "pending",
             "is_recurring": random.random() < 0.5,      # NEW: subscription/mandate vs one-time
