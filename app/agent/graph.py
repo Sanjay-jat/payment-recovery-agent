@@ -6,11 +6,10 @@ from langgraph.graph import StateGraph, END
 
 from app.agent.state import RecoveryState
 from app.agent.nodes import detect_decline, decide_action, compliance_gate, execute, track_outcome
-
-
 def should_continue(state: RecoveryState) -> str:
-    """Conditional edge: loop back to decide_action, or end."""
-    if state["status"] == "pending" and state["retry_count"] < state["max_retries"]:
+    """Loop as long as status is still pending — decide_action itself
+    handles routing to a final message once retries are exhausted."""
+    if state["status"] == "pending":
         return "decide_action"
     return END
 

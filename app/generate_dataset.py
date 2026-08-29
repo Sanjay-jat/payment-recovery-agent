@@ -33,6 +33,8 @@ def generate(n: int, seed: int) -> list[dict]:
             "failed_at": failed_at.isoformat() + "Z",
             "retry_count": 0,
             "status": "pending",
+            "is_recurring": random.random() < 0.5,      # NEW: subscription/mandate vs one-time
+            "opted_out": random.random() < 0.05,         # NEW: 5% customers opted out of contact
         })
     return records
 

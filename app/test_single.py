@@ -4,6 +4,8 @@ Quick manual test: run ONE payment through the full graph and print the trail.
 
 import json
 
+from more_itertools import sample
+
 from app.agent.graph import app_graph
 from app.decline_codes import MAX_RETRIES
 
@@ -11,16 +13,22 @@ with open("payments.json") as f:
     payments = json.load(f)
 
 # pick a soft-decline record and a hard-decline record to test both paths
-sample = next(p for p in payments if p["decline_code"] in
-    ("CARD_EXPIRED", "INVALID_VPA", "RISK_FRAUD_BLOCK", "CARD_REPORTED_LOST_STOLEN", "MANDATE_NOT_REGISTERED"))  # change index to test different records
+# non-recurring soft decline test
+sample1 = next(p for p in payments if p["opted_out"])
+# sample1 = next(p for p in payments if p["is_recurring"] and p["decline_code"] in
+    # ("CARD_EXPIRED", "INVALID_VPA", "RISK_FRAUD_BLOCK"))
+ # change index to test different records
+# sample1 = next(p for p in payments if p["is_recurring"] and p["decline_code"] == "INSUFFICIENT_FUNDS")
 
 initial_state = {
-    "payment_id": sample["payment_id"],
-    "customer_id": sample["customer_id"],
-    "amount": sample["amount"],
-    "channel": sample["channel"],
-    "decline_code": sample["decline_code"],
+    "payment_id": sample1["payment_id"],
+    "customer_id": sample1["customer_id"],
+    "amount": sample1["amount"],
+    "channel": sample1["channel"],
+    "decline_code": sample1["decline_code"],
     "decline_type": None,
+    "is_recurring": sample1["is_recurring"],      # NEW
+    "opted_out": sample1["opted_out"],             # NEW
     "retry_count": 0,
     "max_retries": MAX_RETRIES,
     "status": "pending",

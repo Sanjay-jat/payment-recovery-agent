@@ -25,6 +25,13 @@ def detect_decline(state: RecoveryState) -> dict:
 
 def decide_action(state: RecoveryState) -> dict:
     """Pick the next action based on decline type and retries remaining."""
+    # Rule: a non-recurring payment has no stored authorization — can never be silently retried
+    if state["decline_type"] == "soft" and not state["is_recurring"]:
+        log_line = "[decide_action] Soft decline but one-time payment (no saved instrument) -> cannot silently retry, sending message instead"
+        return {
+            "next_action": "send_message",
+            "audit_log": state["audit_log"] + [log_line],
+        }
 
     # Hard decline -> never retry, always route to a message instead.
     if state["decline_type"] == "hard":
@@ -53,6 +60,22 @@ def decide_action(state: RecoveryState) -> dict:
 
 def compliance_gate(state: RecoveryState) -> dict:
     """Check whether the decided action is actually allowed to happen right now."""
+    if state["opted_out"] and state["next_action"] == "send_message":
+        log_line = "[compliance_gate] BLOCKED: customer has opted out of contact"
+        return {
+            "action_allowed": False,
+            "status": "blocked",
+            "audit_log": state["audit_log"] + [log_line],
+        }
+
+    # Rule: double safety - never retry a non-recurring payment even if decide_action somehow allowed it
+    if state["next_action"] == "retry_charge" and not state["is_recurring"]:
+        log_line = "[compliance_gate] BLOCKED: cannot retry a non-recurring payment (no stored authorization)"
+        return {
+            "action_allowed": False,
+            "status": "blocked",
+            "audit_log": state["audit_log"] + [log_line],
+        }
     now_hour = datetime.now(timezone.utc).hour
 
     # Rule 1: contact window (RBI Fair Practices Code style — no contact outside 8AM-7PM)
@@ -100,6 +123,16 @@ Do not use pressure or threatening language. Keep it warm and helpful."""
 
 def execute(state: RecoveryState, llm_provider: str = "ollama") -> dict:
     """Perform the allowed action: simulate a retry, or generate a reminder message."""
+    if state["next_action"] == "retry_charge":
+        idempotency_key = f"{state['payment_id']}_attempt_{state['retry_count'] + 1}"
+        success = random.random() < 0.65
+        outcome = "success" if success else "failed"
+        log_line = f"[execute] Retry attempt {state['retry_count'] + 1} (idempotency_key={idempotency_key}) -> {outcome}"
+        return {
+            "retry_count": state["retry_count"] + 1,
+            "status": "recovered" if success else "pending",
+            "audit_log": state["audit_log"] + [log_line],
+        }
 
     if not state["action_allowed"]:
         # Nothing to execute, compliance_gate already blocked it.
