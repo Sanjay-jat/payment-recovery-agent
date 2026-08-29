@@ -13,7 +13,7 @@ app = FastAPI(title="Payment Recovery Agent")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],       # fine for a hackathon demo; tighten for real prod
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -75,22 +75,6 @@ def list_payments(limit: int = 50):
         db.close()
 
 
-@app.get("/payments/{payment_id}/audit")
-def get_audit_trail(payment_id: str):
-    db = SessionLocal()
-    try:
-        logs = (
-            db.query(AuditLog)
-            .filter_by(payment_id=payment_id)
-            .order_by(AuditLog.created_at)
-            .all()
-        )
-        return [
-            {"node": log.node_name, "message": log.message, "at": log.created_at.isoformat()}
-            for log in logs
-        ]
-    finally:
-        db.close()
 def generate_summary(logs: list[dict]) -> str:
     """Turn the raw audit trail into one plain-English sentence."""
     text = " ".join(l["message"] for l in logs)
@@ -110,6 +94,7 @@ def generate_summary(logs: list[dict]) -> str:
 
     final_status = logs[-1]["message"] if logs else ""
     return f"This payment ended up '{final_status.split(':')[-1].strip()}' because {reason}."
+
 
 @app.get("/payments/{payment_id}/audit")
 def get_audit_trail(payment_id: str):
