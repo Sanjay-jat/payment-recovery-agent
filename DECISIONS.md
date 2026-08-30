@@ -16,3 +16,27 @@ route through an Ollama LLM call (message generation) sequentially on CPU.
 This is expected batch-processing behavior, not a bug.
 
 Bug: had two get_audit_trail functions defined for the same route — the older one (returning a flat list) silently took precedence over the new summary+steps version. Fixed by removing the duplicate."
+
+
+---
+
+Bug: Simulate feature initially showed no delay and no LLM-generated message for
+several test cases — turned out those specific inputs (soft decline + recurring +
+retry succeeded, or opted-out customer) never reach the LLM node at all by design,
+since retry_charge and blocked paths don't call execute's message branch. Not a
+bug — confirmed correct routing by testing CARD_EXPIRED (hard decline) instead.
+
+---
+
+Bug: compliance_gate checked business hours (8am-7pm) using UTC instead of IST,
+causing incorrect blocks even during valid Indian business hours (e.g. blocked at
+what was actually 10:30am IST because the server read it as 5:00am UTC). Fixed by
+converting to IST (UTC+5:30) before the hour check.
+
+---
+
+Feature: Added a "Simulate a Payment" interactive panel (/simulate endpoint +
+frontend form) so a judge/reviewer can input any decline reason, amount, and
+recurring/opt-out flags and watch the agent's live decision + full audit trail,
+without needing to browse the pre-run batch. Reused the same generate_summary()
+helper as the ledger for consistency.

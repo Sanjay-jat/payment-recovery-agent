@@ -78,13 +78,18 @@ export default function App() {
   const runSimulation = async () => {
     setSimLoading(true);
     setSimResult(null);
-    const result = await fetch(`${API}/simulate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(simForm),
-    }).then(r => r.json());
-    setSimResult(result);
-    setSimLoading(false);
+    try {
+      const result = await fetch(`${API}/simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(simForm),
+      }).then(r => r.json());
+      setSimResult(result);
+    } catch (err) {
+      setSimResult({ summary: "Something went wrong reaching the agent.", final_status: "error", retry_count: 0, steps: [] });
+    } finally {
+      setSimLoading(false);
+    }
   };
   const toggleExpand = async (id) => {
     if (expandedId === id) { setExpandedId(null); return; }
