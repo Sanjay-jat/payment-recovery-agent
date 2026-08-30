@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, GitBranch, ShieldCheck, Zap, Activity, Check, ArrowRight } from "lucide-react";
+import { Search, GitBranch, ShieldCheck, Zap, Activity, Check, ArrowRight, PlayCircle } from "lucide-react";
 import "./App.css";
 
 const API = "http://localhost:8000";
@@ -11,6 +11,7 @@ const STATUS_LABELS = {
   blocked: "Action blocked",
   pending: "Retry in progress",
 };
+
 
 const AGENT_STEPS = [
   {
@@ -53,6 +54,10 @@ function curateSample(list, perStatus = 4, cap = 18) {
 }
 
 export default function App() {
+  const [declineCodes, setDeclineCodes] = useState([]);
+  const [simForm, setSimForm] = useState({ amount: 5000, decline_code: "", is_recurring: true, opted_out: false });
+  const [simResult, setSimResult] = useState(null);
+  const [simLoading, setSimLoading] = useState(false);
   const [dashboard, setDashboard] = useState(null);
   const [payments, setPayments] = useState([]);
   const [filter, setFilter] = useState("all");
@@ -63,11 +68,24 @@ export default function App() {
 
   useEffect(() => {
     fetch(`${API}/dashboard`).then(r => r.json()).then(setDashboard);
-    fetch(`${API}/payments?limit=200`)
-      .then(r => r.json())
-      .then(data => setPayments(curateSample(data)));
+    fetch(`${API}/payments?limit=200`).then(r => r.json()).then(data => setPayments(curateSample(data)));
+    fetch(`${API}/decline-codes`).then(r => r.json()).then(codes => {
+      setDeclineCodes(codes);
+      setSimForm(f => ({ ...f, decline_code: codes[0] }));
+    });
   }, []);
 
+  const runSimulation = async () => {
+    setSimLoading(true);
+    setSimResult(null);
+    const result = await fetch(`${API}/simulate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(simForm),
+    }).then(r => r.json());
+    setSimResult(result);
+    setSimLoading(false);
+  };
   const toggleExpand = async (id) => {
     if (expandedId === id) { setExpandedId(null); return; }
     setExpandedId(id);
@@ -180,6 +198,74 @@ export default function App() {
             </div>
           </section>
         )}
+
+        <section className="panel">
+          <h2>Try it yourself</h2>
+          <p className="section-body">
+            Simulate any failed payment and watch the agent decide, live.
+          </p>
+
+          <div className="sim-form">
+            <div className="sim-field">
+              <label>Amount (₹)</label>
+              <input
+                type="number"
+                value={simForm.amount}
+                onChange={e => setSimForm({ ...simForm, amount: parseFloat(e.target.value) })}
+              />
+            </div>
+
+            <div className="sim-field">
+              <label>Decline reason</label>
+              <select
+                value={simForm.decline_code}
+                onChange={e => setSimForm({ ...simForm, decline_code: e.target.value })}
+              >
+                {declineCodes.map(code => <option key={code} value={code}>{code}</option>)}
+              </select>
+            </div>
+
+            <div className="sim-toggles">
+              <label className="sim-toggle">
+                <input
+                  type="checkbox"
+                  checked={simForm.is_recurring}
+                  onChange={e => setSimForm({ ...simForm, is_recurring: e.target.checked })}
+                />
+                Recurring / saved instrument
+              </label>
+              <label className="sim-toggle">
+                <input
+                  type="checkbox"
+                  checked={simForm.opted_out}
+                  onChange={e => setSimForm({ ...simForm, opted_out: e.target.checked })}
+                />
+                Customer opted out of contact
+              </label>
+            </div>
+
+            <button className="btn-primary sim-run" onClick={runSimulation} disabled={simLoading}>
+              <PlayCircle size={16} /> {simLoading ? "Running..." : "Run agent"}
+            </button>
+          </div>
+
+          {simResult && (
+            <div className="trail sim-trail">
+              <p className="trail-summary">{simResult.summary}</p>
+              <p className="trail-summary" style={{background: "transparent", padding: 0, fontWeight: 500}}>
+                Final status: <strong>{simResult.final_status}</strong> · {simResult.retry_count} retries used
+              </p>
+              {simResult.steps.map((line, i) => (
+                <div className="trail-step" key={i}>
+                  <div className="trail-dot" />
+                  <div className="trail-content">
+                    <span className="trail-message">{line}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         <section className="panel">
           <h2>Recovery activity</h2>

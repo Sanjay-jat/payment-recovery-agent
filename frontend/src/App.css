@@ -437,8 +437,53 @@ h3 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
 
 .trail-message { font-size: 13px; }
 
+/* Simulation form */
+.sim-form {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.sim-field { display: flex; flex-direction: column; gap: 6px; }
+.sim-field label { font-size: 12.5px; color: rgba(30, 37, 40, 0.55); font-weight: 500; }
+
+.sim-field input, .sim-field select {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  background: #fff;
+}
+
+.sim-toggles {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 20px;
+}
+
+.sim-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(30, 37, 40, 0.65);
+  cursor: pointer;
+}
+
+.sim-run {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.sim-trail { padding-top: 4px; border-top: 1px solid rgba(0, 0, 0, 0.06); padding-top: 20px; }
+
 @media (max-width: 640px) {
   .metrics { grid-template-columns: repeat(2, 1fr); }
   .ledger-row { grid-template-columns: 1fr; gap: 4px; }
   .flow-node-caption { font-size: 10.5px; }
+  .sim-form { grid-template-columns: 1fr; }
 }

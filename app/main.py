@@ -116,3 +116,47 @@ def get_audit_trail(payment_id: str):
         }
     finally:
         db.close()
+
+from pydantic import BaseModel
+from app.agent.graph import app_graph
+from app.decline_codes import MAX_RETRIES, DECLINE_CODES
+
+
+class SimulateRequest(BaseModel):
+    amount: float
+    decline_code: str
+    is_recurring: bool
+    opted_out: bool = False
+
+
+@app.post("/simulate")
+def simulate_payment(req: SimulateRequest):
+    initial_state = {
+        "payment_id": "sim_preview",
+        "customer_id": "sim_customer",
+        "amount": req.amount,
+        "channel": "upi",
+        "decline_code": req.decline_code,
+        "decline_type": None,
+        "is_recurring": req.is_recurring,
+        "opted_out": req.opted_out,
+        "retry_count": 0,
+        "max_retries": MAX_RETRIES,
+        "status": "pending",
+        "next_action": None,
+        "action_allowed": None,
+        "audit_log": [],
+    }
+    final_state = app_graph.invoke(initial_state)
+    steps = [{"message": line} for line in final_state["audit_log"]]
+    return {
+        "final_status": final_state["status"],
+        "retry_count": final_state["retry_count"],
+        "summary": generate_summary(steps),
+        "steps": final_state["audit_log"],
+    }
+
+
+@app.get("/decline-codes")
+def list_decline_codes():
+    return list(DECLINE_CODES.keys())

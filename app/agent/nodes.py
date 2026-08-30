@@ -57,7 +57,9 @@ def decide_action(state: RecoveryState) -> dict:
         "next_action": "retry_charge",
         "audit_log": state["audit_log"] + [log_line],
     }
+from datetime import timedelta
 
+IST = timezone(timedelta(hours=5, minutes=30))
 def compliance_gate(state: RecoveryState) -> dict:
     """Check whether the decided action is actually allowed to happen right now."""
     if state["opted_out"] and state["next_action"] == "send_message":
@@ -76,7 +78,7 @@ def compliance_gate(state: RecoveryState) -> dict:
             "status": "blocked",
             "audit_log": state["audit_log"] + [log_line],
         }
-    now_hour = datetime.now(timezone.utc).hour
+    now_hour = datetime.now(IST).hour
 
     # Rule 1: contact window (RBI Fair Practices Code style — no contact outside 8AM-7PM)
     if state["next_action"] == "send_message":
