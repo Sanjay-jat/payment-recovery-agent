@@ -2,7 +2,8 @@
 FastAPI app exposing the recovery agent's batch runner and dashboard data.
 """
 
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 
@@ -121,6 +122,8 @@ from pydantic import BaseModel
 from app.agent.graph import app_graph
 from app.decline_codes import MAX_RETRIES, DECLINE_CODES
 
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
+
 
 class SimulateRequest(BaseModel):
     amount: float
@@ -130,7 +133,7 @@ class SimulateRequest(BaseModel):
 
 
 @app.post("/simulate")
-def simulate_payment(req: SimulateRequest):
+def simulate_payment(req: SimulateRequest, x_gemini_key: str | None = Header(default=None)):
     initial_state = {
         "payment_id": "sim_preview",
         "customer_id": "sim_customer",
@@ -147,7 +150,11 @@ def simulate_payment(req: SimulateRequest):
         "action_allowed": None,
         "audit_log": [],
     }
-    final_state = app_graph.invoke(initial_state)
+    # pass provider + key through to the graph's execute node
+    final_state = app_graph.invoke(
+        initial_state,
+        config={"configurable": {"llm_provider": LLM_PROVIDER, "gemini_key": x_gemini_key}},
+    )
     steps = [{"message": line} for line in final_state["audit_log"]]
     return {
         "final_status": final_state["status"],

@@ -65,6 +65,7 @@ export default function App() {
   const [auditTrails, setAuditTrails] = useState({});
   const [showAgentFlow, setShowAgentFlow] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [geminiKey, setGeminiKey] = useState("");
 
   useEffect(() => {
     fetch(`${API}/dashboard`).then(r => r.json()).then(setDashboard);
@@ -81,7 +82,10 @@ export default function App() {
     try {
       const result = await fetch(`${API}/simulate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(geminiKey ? { "X-Gemini-Key": geminiKey } : {}),
+        },
         body: JSON.stringify(simForm),
       }).then(r => r.json());
       setSimResult(result);
@@ -247,6 +251,16 @@ export default function App() {
                 />
                 Customer opted out of contact
               </label>
+            </div>
+
+            <div className="sim-field" style={{gridColumn: "1 / -1"}}>
+              <label>Gemini API key (optional — only needed when Ollama isn't available)</label>
+              <input
+                type="password"
+                placeholder="Paste your Gemini API key to enable live messages"
+                value={geminiKey}
+                onChange={e => setGeminiKey(e.target.value)}
+              />
             </div>
 
             <button className="btn-primary sim-run" onClick={runSimulation} disabled={simLoading}>
