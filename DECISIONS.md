@@ -40,3 +40,5 @@ frontend form) so a judge/reviewer can input any decline reason, amount, and
 recurring/opt-out flags and watch the agent's live decision + full audit trail,
 without needing to browse the pre-run batch. Reused the same generate_summary()
 helper as the ledger for consistency.
+
+Bug: ChatOllama had no timeout, so if Ollama was down, the request hung indefinitely with no feedback. Fixed with client_kwargs={'timeout': 8.0} — now fails fast and the agent still completes gracefully (message just says '[LLM unavailable]'), rather than the whole request hanging
