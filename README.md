@@ -34,20 +34,21 @@ it or send the customer a nudge.
 ## See it in action
  
 <div align="center">
-![Recoverly dashboard](docs/screenshot-dashboard.png)
+![Recoverly overview](docs/screenshot-hero.png)
  
-*The dashboard — recovery metrics, the agent's reasoning flow, and every payment in the ledger.*
+*The overview — recovery metrics up top, and the agent's actual reasoning flow below, one click away from any step's full explanation.*
  
 <br/>
 ![Try it yourself simulator](docs/screenshot-simulator.png)
  
-*The built-in simulator — trigger a real agent decision on any scenario and watch the reasoning happen live.*
+*The built-in simulator — pick any decline reason and flags, hit "Run agent," and watch a real decision happen live, audit trail included.*
+ 
+<br/>
+![Recovery activity and payment ledger](docs/screenshot-ledger.png)
+ 
+*Recent activity at a glance, and the full ledger below it — every payment, its outcome, and (on click) exactly why.*
  
 </div>
-> Drop your own screenshots into `docs/screenshot-dashboard.png` and
-> `docs/screenshot-simulator.png` — a full-page browser capture of the
-> running app is enough.
- 
 ---
  
 ## How the agent actually thinks
@@ -179,4 +180,3 @@ you want to see how this was actually built, not just the finished shape.
 *Built by Sanjuu for the Razorpay AI Buildathon 2026.*
  
 </div>
- 
