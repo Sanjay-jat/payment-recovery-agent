@@ -34,7 +34,7 @@ it or send the customer a nudge.
 ## See it in action
  
 <div align="center">
-![Recoverly overview](/home/sanju/projects/Recovery-agent/docs/screenshot-hero.png)
+![Recoverly overview](docs/screenshot-hero.png)
  
 *The overview — recovery metrics up top, and the agent's actual reasoning flow below, one click away from any step's full explanation.*
  
