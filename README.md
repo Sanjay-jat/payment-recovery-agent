@@ -34,18 +34,15 @@ it or send the customer a nudge.
 ## See it in action
  
 <div align="center">
-![Recoverly overview](docs/screenshot-hero.png)
- 
+<img src="docs/screenshot-hero.png" alt="Recoverly overview" width="800"/>
 *The overview — recovery metrics up top, and the agent's actual reasoning flow below, one click away from any step's full explanation.*
  
 <br/>
-![Try it yourself simulator](docs/screenshot-simulator.png)
- 
+<img src="docs/screenshot-simulator.png" alt="Try it yourself simulator" width="800"/>
 *The built-in simulator — pick any decline reason and flags, hit "Run agent," and watch a real decision happen live, audit trail included.*
  
 <br/>
-![Recovery activity and payment ledger](docs/screenshot-ledger.png)
- 
+<img src="docs/screenshot-ledger.png" alt="Recovery activity and payment ledger" width="800"/>
 *Recent activity at a glance, and the full ledger below it — every payment, its outcome, and (on click) exactly why.*
  
 </div>
