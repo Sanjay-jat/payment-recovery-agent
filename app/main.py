@@ -12,7 +12,6 @@ from app.models import Payment, AuditLog
 import random
 from datetime import datetime, timezone
 from fastapi import HTTPException
-from sqlalchemy import func
 from app.agent.nodes import MESSAGE_PROMPT
 from app.decline_codes import DECLINE_CODES
 from app.llm import get_llm
@@ -37,6 +36,8 @@ def get_dashboard():
         total_amount = db.query(func.sum(Payment.amount)).scalar() or 0
         recovered_amount = db.query(func.sum(Payment.recovered_amount)).scalar() or 0
         recovered_count = db.query(Payment).filter_by(status="recovered").count()
+        pending_approval_amount = db.query(func.sum(Payment.amount)).filter_by(status="pending_approval").scalar() or 0
+        pending_approval_count = db.query(Payment).filter_by(status="pending_approval").count()
 
         status_breakdown = (
             db.query(Payment.status, func.count(Payment.payment_id))
@@ -59,6 +60,8 @@ def get_dashboard():
             "recovery_rate_pct": round(recovered_count / total * 100, 1) if total else 0,
             "status_breakdown": {status: count for status, count in status_breakdown},
             "retry_funnel": {f"attempt_{n}": count for n, count in retry_funnel},
+            "pending_approval_amount": float(pending_approval_amount),
+            "pending_approval_count": pending_approval_count,
         }
     finally:
         db.close()
@@ -103,7 +106,8 @@ def generate_summary(logs: list[dict]) -> str:
         reason = "of the rules below"
 
     final_status = logs[-1]["message"] if logs else ""
-    return f"This payment ended up '{final_status.split(':')[-1].strip()}' because {reason}."
+    status_text = final_status.split(':')[-1].strip() if ':' in final_status else final_status
+    return f"This payment ended up '{status_text}' because {reason}."
 
 
 @app.get("/payments/{payment_id}/audit")
@@ -131,14 +135,19 @@ from pydantic import BaseModel
 from app.agent.graph import app_graph
 from app.decline_codes import MAX_RETRIES, DECLINE_CODES
 
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
-
 
 class SimulateRequest(BaseModel):
     amount: float
     decline_code: str
     is_recurring: bool
     opted_out: bool = False
+
+
+class SimApproveRequest(BaseModel):
+    amount: float
+    decline_code: str
+    next_action: str
+    retry_count: int = 0
 
 
 @app.post("/simulate")
@@ -159,18 +168,45 @@ def simulate_payment(req: SimulateRequest, x_gemini_key: str | None = Header(def
         "action_allowed": None,
         "audit_log": [],
     }
-    # pass provider + key through to the graph's execute node
     final_state = app_graph.invoke(
         initial_state,
         config={"configurable": {"llm_provider": LLM_PROVIDER, "gemini_key": x_gemini_key}},
     )
-    steps = [{"message": line} for line in final_state["audit_log"]]
+    steps = []
+    for line in final_state["audit_log"]:
+        node = line.split("]")[0].strip("[") if line.startswith("[") else "unknown"
+        msg = line.split("]", 1)[1].strip() if "]" in line else line
+        steps.append({"node": node, "message": msg})
+
     return {
         "final_status": final_state["status"],
         "retry_count": final_state["retry_count"],
+        "pending_action": final_state.get("next_action"),
         "summary": generate_summary(steps),
         "steps": final_state["audit_log"],
     }
+
+
+@app.post("/simulate/approve")
+def simulate_approve(req: SimApproveRequest, x_gemini_key: str | None = Header(default=None)):
+    if req.next_action == "retry_charge":
+        success = random.random() < 0.65
+        line = f"[execute] Approved retry (idempotency_key=sim_preview_attempt_{req.retry_count + 1}) -> {'success' if success else 'failed'}"
+        status = "recovered" if success else "pending"
+    else:
+        try:
+            llm = get_llm(provider=LLM_PROVIDER, api_key=x_gemini_key)
+            prompt = MESSAGE_PROMPT.format(
+                payment_id="sim_preview", amount=req.amount,
+                reason=DECLINE_CODES[req.decline_code]["description"],
+            )
+            response = llm.invoke(prompt)
+            message = response.content if hasattr(response, "content") else str(response)
+        except Exception as e:
+            message = f"[LLM unavailable: {e}]"
+        line = f"[execute] Approved message sent: {message[:80]}..."
+        status = "escalated" if DECLINE_CODES[req.decline_code]["type"] == "hard" else "exhausted"
+    return {"final_status": status, "line": line}
 
 
 @app.get("/decline-codes")
