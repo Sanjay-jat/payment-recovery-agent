@@ -481,6 +481,32 @@ h3 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
 
 .sim-trail { padding-top: 4px; border-top: 1px solid rgba(0, 0, 0, 0.06); padding-top: 20px; }
 
+.approval-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(169, 103, 58, 0.08);
+  border: 1px solid rgba(169, 103, 58, 0.2);
+  color: #8a5730;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  max-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  transition: background 0.15s ease;
+}
+.approval-banner:hover { background: rgba(169, 103, 58, 0.14); }
+.approval-banner svg:last-child { margin-left: 4px; }
+
+.approve-inline {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
 @media (max-width: 640px) {
   .metrics { grid-template-columns: repeat(2, 1fr); }
   .ledger-row { grid-template-columns: 1fr; gap: 4px; }
