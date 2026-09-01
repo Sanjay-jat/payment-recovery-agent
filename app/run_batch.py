@@ -57,6 +57,7 @@ for record in payments:
     payment_row.decline_type = final_state["decline_type"]
     payment_row.retry_count = final_state["retry_count"]
     payment_row.status = final_state["status"]
+    payment_row.pending_action = final_state.get("next_action")
     if final_state["status"] == "recovered":
         payment_row.recovered_amount = record["amount"]
 

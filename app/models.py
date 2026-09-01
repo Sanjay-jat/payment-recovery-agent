@@ -25,6 +25,7 @@ class Payment(Base):
     status = Column(String, nullable=False, default="pending")
     recovered_amount = Column(Numeric(10, 2))
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    pending_action = Column(String)
 
 
 class RetryAttempt(Base):

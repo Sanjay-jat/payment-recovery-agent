@@ -7,6 +7,7 @@ from datetime import datetime, timezone, timedelta
 from app.decline_codes import DECLINE_CODES, is_hard_decline, get_retry_plan, MAX_RETRIES
 from app.decline_codes import ALLOWED_CONTACT_START_HOUR, ALLOWED_CONTACT_END_HOUR
 from app.agent.state import RecoveryState
+from app.decline_codes import HIGH_VALUE_THRESHOLD
 
 
 def detect_decline(state: RecoveryState) -> dict:
@@ -61,6 +62,13 @@ from datetime import timedelta
 
 IST = timezone(timedelta(hours=5, minutes=30))
 def compliance_gate(state: RecoveryState) -> dict:
+    if state["amount"] >= HIGH_VALUE_THRESHOLD:
+        log_line = f"[compliance_gate] High-value payment (₹{state['amount']}) -> requires human approval before {state['next_action']}"
+        return {
+            "status": "pending_approval",
+            "action_allowed": False,
+            "audit_log": state["audit_log"] + [log_line],
+        }
     """Check whether the decided action is actually allowed to happen right now."""
     if state["opted_out"] and state["next_action"] == "send_message":
         log_line = "[compliance_gate] BLOCKED: customer has opted out of contact"

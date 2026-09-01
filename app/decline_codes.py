@@ -74,3 +74,5 @@ def is_hard_decline(code: str) -> bool:
 def get_retry_plan(code: str) -> tuple[int, str]:
     rule = DECLINE_CODES[code]
     return rule["retry_delay_hours"], rule["retry_channel"]
+
+HIGH_VALUE_THRESHOLD = 10000
