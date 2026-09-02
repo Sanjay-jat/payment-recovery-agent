@@ -92,7 +92,9 @@ def generate_summary(logs: list[dict]) -> str:
     """Turn the raw audit trail into one plain-English sentence."""
     text = " ".join(l["message"] for l in logs)
 
-    if "hard" in text.lower() and "will not retry" in text.lower():
+    if "requires human approval" in text.lower():
+        reason = "the amount requires a human to approve the retry first"
+    elif "hard" in text.lower() and "will not retry" in text.lower():
         reason = "the payment method itself is invalid or expired"
     elif "one-time payment" in text.lower():
         reason = "it was a one-time payment with no saved method to retry"
