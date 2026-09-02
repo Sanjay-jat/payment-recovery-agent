@@ -554,6 +554,30 @@ h3 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
   margin-top: 4px;
 }
 
+.btn-approve, .btn-reject {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-approve {
+  background: var(--brand);
+  color: #fff;
+}
+.btn-approve:hover { background: #0d6259; }
+.btn-approve:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-reject {
+  background: transparent;
+  color: rgba(30, 37, 40, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+.btn-reject:hover { background: rgba(0, 0, 0, 0.04); }
+
 .queue-card-buttons .btn-approve,
 .queue-card-buttons .btn-reject {
   flex: 1;

@@ -382,11 +382,11 @@ export default function App() {
         </div>
       ) : (
         <div className="page">
-          <header className="hero" style={{ textAlign: "left", alignItems: "flex-start" }}>
-            <h1 style={{ fontSize: 28 }}>Approval Queue</h1>
-            <p className="subtitle" style={{ margin: 0, maxWidth: "none" }}>
-              High-value payments (₹10,000+) never move automatically — every retry or
-              message here is waiting on a human decision.
+          <header className="hero" style={{ textAlign: "center" }}>
+            <h1 style={{ fontSize: 28 }}>Payment approvals</h1>
+            <p className="subtitle">
+              Any high-value retry over ₹10,000 waits here for a person to sign off,
+              so the agent never moves real money entirely on its own.
             </p>
           </header>
 
@@ -398,11 +398,11 @@ export default function App() {
               </div>
               <div className="metric-card">
                 <span className="metric-label">Approved</span>
-                <span className="metric-value mono">{approvalStats.approved_total}</span>
+                <span className="metric-value mono">{approvalStats.approved_total ?? 0}</span>
               </div>
               <div className="metric-card">
                 <span className="metric-label">Rejected</span>
-                <span className="metric-value mono">{approvalStats.rejected_total}</span>
+                <span className="metric-value mono">{approvalStats.rejected_total ?? 0}</span>
               </div>
               <div className="metric-card">
                 <span className="metric-label">Auto-resolved (below threshold)</span>
