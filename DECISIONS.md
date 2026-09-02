@@ -42,3 +42,46 @@ without needing to browse the pre-run batch. Reused the same generate_summary()
 helper as the ledger for consistency.
 
 Bug: ChatOllama had no timeout, so if Ollama was down, the request hung indefinitely with no feedback. Fixed with client_kwargs={'timeout': 8.0} — now fails fast and the agent still completes gracefully (message just says '[LLM unavailable]'), rather than the whole request hanging
+
+---
+
+Bug: generate_summary() had no branch for the pending_approval case, so it
+fell through to the generic "else" fallback while also picking the wrong
+audit-log line as the "final status" — producing a garbled summary sentence
+like "ended up 'Still pending after attempt 0...' because of the rules
+below." Fixed by adding an explicit check for "requires human approval" in
+the audit text, checked first in the if/elif chain.
+
+---
+
+Bug: compliance_gate originally required human approval for ANY high-value
+(₹10,000+) payment, including message-only actions on hard declines (e.g. a
+₹50,000 expired card). Since a message carries no financial risk — no money
+moves — this was over-cautious. Fixed to only require approval when the
+pending action is specifically retry_charge (i.e. money is about to move).
+
+---
+
+Feature: Added a human-in-the-loop approval queue for high-value
+(₹10,000+) retry actions. compliance_gate now routes these to a
+"pending_approval" status instead of executing automatically. New
+endpoints: GET /approval-queue, GET /approval-stats,
+POST /payments/{id}/approve, POST /payments/{id}/reject. The dashboard
+shows a clickable banner with the pending amount/count, and a separate
+"Approval Queue" page lists each request with its recovery probability.
+
+---
+
+Feature: Added a recovery-probability score per decline code, computed
+from real historical outcomes in the batch (recovered count / total count
+per decline_code) rather than a hardcoded or fake ML score. Hard-decline
+codes correctly show 0% since they're never retried — this was a deliberate
+signal that the number is genuine, not decorative.
+
+---
+
+Decision: Changed "Approved today" / "Rejected today" stats to all-time
+totals ("Approved" / "Rejected"). Date-scoped stats reset misleadingly
+across demo sessions (e.g. approvals done yesterday showed as 0 today),
+which is confusing for a reviewer testing the app once rather than using
+it daily.

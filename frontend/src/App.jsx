@@ -418,29 +418,35 @@ export default function App() {
               recovery probability for that decline reason, computed from the batch.
             </p>
 
-            <div className="queue-list">
-              {queue.length === 0 && <p className="section-body">No pending approvals right now.</p>}
+            {queue.length === 0 && <p className="section-body">No pending approvals right now.</p>}
+            <div className="queue-grid">
               {queue.map(item => (
-                <div className="queue-item" key={item.payment_id}>
-                  <div className="queue-main">
-                    <span className="mono id">{item.payment_id}</span>
-                    <span className="mono amount">₹{item.amount.toLocaleString("en-IN")}</span>
-                    <span className="decline-code">{item.decline_code}</span>
-                    <span className="queue-action">
-                      {item.pending_action === "retry_charge" ? "Wants to retry" : "Wants to message customer"}
-                    </span>
+                <div className="queue-card" key={item.payment_id}>
+                  <div className="queue-card-top">
+                    <div>
+                      <span className="mono queue-amount">₹{item.amount.toLocaleString("en-IN")}</span>
+                      <span className="mono queue-id">{item.payment_id}</span>
+                    </div>
                     {item.recovery_probability !== null && (
                       <span className={`prob-pill ${item.recovery_probability >= 50 ? "prob-high" : "prob-low"}`}>
-                        P(recovery): {item.recovery_probability}%
+                        P(recovery) {item.recovery_probability}%
                       </span>
                     )}
                   </div>
-                  <div className="queue-buttons">
+
+                  <div className="queue-card-mid">
+                    <span className="decline-code">{item.decline_code}</span>
+                    <span className="queue-action">
+                      {item.pending_action === "retry_charge" ? "→ wants to retry the charge" : "→ wants to message the customer"}
+                    </span>
+                  </div>
+
+                  <div className="queue-card-buttons">
                     <button className="btn-reject" disabled={actingOn === item.payment_id} onClick={() => actOnApproval(item.payment_id, "reject")}>
                       Reject
                     </button>
                     <button className="btn-approve" disabled={actingOn === item.payment_id} onClick={() => actOnApproval(item.payment_id, "approve")}>
-                      {actingOn === item.payment_id ? "..." : "Approve"}
+                      {actingOn === item.payment_id ? "Working..." : "Approve"}
                     </button>
                   </div>
                 </div>
