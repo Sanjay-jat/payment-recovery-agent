@@ -247,24 +247,21 @@ def approval_stats():
     db = SessionLocal()
     try:
         pending = db.query(Payment).filter_by(status="pending_approval").count()
-        today = datetime.now(timezone.utc).date()
         approved_today = db.query(AuditLog).filter(
             AuditLog.node_name == "approval",
             AuditLog.message.like("[approval] Approved%"),
-            func.date(AuditLog.created_at) == today,
         ).count()
         rejected_today = db.query(AuditLog).filter(
             AuditLog.node_name == "approval",
             AuditLog.message.like("[approval] Rejected%"),
-            func.date(AuditLog.created_at) == today,
         ).count()
         auto_resolved = db.query(Payment).filter(
             Payment.status.in_(["recovered", "exhausted", "escalated", "blocked"])
         ).count()
         return {
             "pending": pending,
-            "approved_today": approved_today,
-            "rejected_today": rejected_today,
+            "approved_total": approved_today,
+            "rejected_total": rejected_today,
             "auto_resolved": auto_resolved,
         }
     finally:

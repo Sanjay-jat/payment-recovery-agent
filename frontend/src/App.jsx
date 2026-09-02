@@ -397,12 +397,12 @@ export default function App() {
                 <span className="metric-value mono brand">{approvalStats.pending}</span>
               </div>
               <div className="metric-card">
-                <span className="metric-label">Approved today</span>
-                <span className="metric-value mono">{approvalStats.approved_today}</span>
+                <span className="metric-label">Approved</span>
+                <span className="metric-value mono">{approvalStats.approved_total}</span>
               </div>
               <div className="metric-card">
-                <span className="metric-label">Rejected today</span>
-                <span className="metric-value mono">{approvalStats.rejected_today}</span>
+                <span className="metric-label">Rejected</span>
+                <span className="metric-value mono">{approvalStats.rejected_total}</span>
               </div>
               <div className="metric-card">
                 <span className="metric-label">Auto-resolved (below threshold)</span>
