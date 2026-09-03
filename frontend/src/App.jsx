@@ -51,6 +51,7 @@ export default function App() {
   const [queue, setQueue] = useState([]);
   const [approvalStats, setApprovalStats] = useState(null);
   const [actingOn, setActingOn] = useState(null);
+  const [operatorToken, setOperatorToken] = useState(localStorage.getItem("operatorToken") || "");
 
   const loadDashboardData = () => {
     fetch(`${API}/dashboard`).then(r => r.json()).then(setDashboard);
@@ -95,6 +96,11 @@ export default function App() {
     setTimeout(() => scrollTo(".agent-flow-section"), 50);
   };
 
+  const saveOperatorToken = (token) => {
+    setOperatorToken(token);
+    localStorage.setItem("operatorToken", token);
+  };
+
   const runSimulation = async () => {
     setSimLoading(true);
     setSimResult(null);
@@ -117,7 +123,11 @@ export default function App() {
     try {
       await fetch(`${API}/payments/${paymentId}/${action}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...(geminiKey ? { "X-Gemini-Key": geminiKey } : {}) },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Operator-Token": operatorToken,
+          ...(geminiKey ? { "X-Gemini-Key": geminiKey } : {}),
+        },
       });
       loadApprovalData();
       loadDashboardData();
@@ -388,6 +398,15 @@ export default function App() {
               Any high-value retry over ₹10,000 waits here for a person to sign off,
               so the agent never moves real money entirely on its own.
             </p>
+            <div className="operator-token-field">
+              <label>Operator token</label>
+              <input
+                type="password"
+                placeholder="Enter operator token to approve/reject"
+                value={operatorToken}
+                onChange={e => saveOperatorToken(e.target.value)}
+              />
+            </div>
           </header>
 
           {approvalStats && (

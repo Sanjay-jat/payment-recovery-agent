@@ -85,3 +85,5 @@ totals ("Approved" / "Rejected"). Date-scoped stats reset misleadingly
 across demo sessions (e.g. approvals done yesterday showed as 0 today),
 which is confusing for a reviewer testing the app once rather than using
 it daily.
+
+Added a lightweight operator-token check on approve/reject endpoints — without it, anyone with the deployed URL could approve/reject payments directly via API, undermining the human-in-the-loop story.

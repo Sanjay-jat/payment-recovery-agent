@@ -24,6 +24,7 @@ services:
     environment:
       DATABASE_URL: postgresql://sanju:sanjupass@postgres:5432/recovery_agent
       LLM_PROVIDER: gemini
+      OPERATOR_TOKEN: 12345
     ports:
       - "8000:8000"
     depends_on:

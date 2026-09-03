@@ -3,7 +3,7 @@ FastAPI app exposing the recovery agent's batch runner and dashboard data.
 """
 
 import os
-from fastapi import FastAPI, Header
+from fastapi import Depends, FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 
@@ -17,6 +17,12 @@ from app.decline_codes import DECLINE_CODES
 from app.llm import get_llm
 
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
+OPERATOR_TOKEN = os.getenv("OPERATOR_TOKEN", "dev-token")
+
+
+def verify_operator_token(x_operator_token: str | None = Header(default=None)):
+    if x_operator_token != OPERATOR_TOKEN:
+        raise HTTPException(403, "Invalid or missing operator token")
 
 app = FastAPI(title="Payment Recovery Agent")
 
@@ -269,7 +275,7 @@ def approval_stats():
 
 
 @app.post("/payments/{payment_id}/approve")
-def approve_payment(payment_id: str, x_gemini_key: str | None = Header(default=None)):
+def approve_payment(payment_id: str, x_gemini_key: str | None = Header(default=None), _: None = Depends(verify_operator_token)):
     db = SessionLocal()
     try:
         row = db.query(Payment).filter_by(payment_id=payment_id).first()
@@ -310,7 +316,7 @@ def approve_payment(payment_id: str, x_gemini_key: str | None = Header(default=N
 
 
 @app.post("/payments/{payment_id}/reject")
-def reject_payment(payment_id: str):
+def reject_payment(payment_id: str, _: None = Depends(verify_operator_token)):
     db = SessionLocal()
     try:
         row = db.query(Payment).filter_by(payment_id=payment_id).first()
