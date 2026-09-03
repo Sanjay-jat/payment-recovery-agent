@@ -406,6 +406,7 @@ export default function App() {
                 value={operatorToken}
                 onChange={e => saveOperatorToken(e.target.value)}
               />
+              <span className="token-hint">Demo token: 12345</span>
             </div>
           </header>
 
