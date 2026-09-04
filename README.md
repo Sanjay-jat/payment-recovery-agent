@@ -100,7 +100,7 @@ If there's no local LLM available (which is the case on a hosted version of the 
 ![Live simulator](docs/Agent.png)
 *The simulator, mid-run, showing the agent's reasoning step by step*
 
-![Payments $ Recovery Activity](docs/Payments & Recovery.png)
+![Payments $ Recovery Activity](docs/Payments_Recovery.png)
 *Payments & Recovery: recovery metrics and the payment stream at a glance*
 
 </div>
