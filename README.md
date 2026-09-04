@@ -183,3 +183,11 @@ docker compose up --build -d
 Built around one question: if you're not going to guess, what's the honest thing an agent can actually do here?
 
 </div>
+
+---
+
+**Sanjay Jat** — [GitHub](https://github.com/Sanjay-jat) · [LinkedIn](https://www.linkedin.com/in/sanjay-jat-250767346) · [sanjayjat354339@gmail.com](mailto:sanjayjat354339@gmail.com)
+ 
+## License
+ 
+[MIT](https://github.com/Sanjay-jat/Recoverly/blob/main/LICENSE) © 2025 Sanjay Jat
