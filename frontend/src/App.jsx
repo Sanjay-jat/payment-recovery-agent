@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Search, GitBranch, ShieldCheck, Zap, Activity, Check, ArrowRight, ShieldAlert, ArrowLeft } from "lucide-react";
 import "./App.css";
 
-const API = "http://localhost:8000";
+const API = "https://payment-recovery-agent-q9bi.onrender.com";
 
 const STATUS_LABELS = {
   recovered: "Payment recovered",

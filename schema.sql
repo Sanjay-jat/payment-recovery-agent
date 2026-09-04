@@ -13,7 +13,8 @@ CREATE TABLE payments (
     max_retries       INT NOT NULL DEFAULT 4,
     status            TEXT NOT NULL DEFAULT 'pending',
     recovered_amount  NUMERIC(10, 2),
-    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    pending_action    TEXT
 );
 
 -- One row per retry/message attempt made on a payment
