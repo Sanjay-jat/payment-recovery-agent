@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from fastapi import HTTPException
 from app.agent.nodes import MESSAGE_PROMPT
 from app.decline_codes import DECLINE_CODES
-from app.llm import get_llm
+from app.llm import get_llm, extract_llm_text
 
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
 OPERATOR_TOKEN = os.getenv("OPERATOR_TOKEN", "dev-token")
@@ -209,7 +209,7 @@ def simulate_approve(req: SimApproveRequest, x_gemini_key: str | None = Header(d
                 reason=DECLINE_CODES[req.decline_code]["description"],
             )
             response = llm.invoke(prompt)
-            message = response.content if hasattr(response, "content") else str(response)
+            message = extract_llm_text(response)
         except Exception as e:
             message = f"[LLM unavailable: {e}]"
         line = f"[execute] Approved message sent: {message[:80]}..."
@@ -300,7 +300,7 @@ def approve_payment(payment_id: str, x_gemini_key: str | None = Header(default=N
                     reason=DECLINE_CODES[row.decline_code]["description"],
                 )
                 response = llm.invoke(prompt)
-                message = response.content if hasattr(response, "content") else str(response)
+                message = extract_llm_text(response)
             except Exception as e:
                 message = f"[LLM unavailable: {e}]"
             lines.append(f"[execute] Approved message sent: {message[:80]}...")

@@ -5,6 +5,22 @@ LLM provider abstraction — swap between local Ollama (dev) and Gemini (deploye
 import os
 
 
+def extract_llm_text(response) -> str:
+    if not hasattr(response, "content"):
+        return str(response)
+    content = response.content
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        if all(isinstance(block, dict) for block in content):
+            return "".join(
+                block["text"] for block in content if block.get("type") == "text"
+            ).strip()
+        if all(isinstance(block, str) for block in content):
+            return "".join(content)
+    return str(content)
+
+
 def get_llm(provider: str = "ollama", api_key: str | None = None):
     if provider == "ollama":
         from langchain_ollama import ChatOllama

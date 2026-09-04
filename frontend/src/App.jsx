@@ -14,11 +14,11 @@ const STATUS_LABELS = {
 };
 
 const AGENT_STEPS = [
-  { icon: Search, label: "Detect decline", detail: "The agent reads the failure reason code and classifies it as a soft decline (recoverable — e.g. a bank timeout) or a hard decline (permanent — e.g. an expired card)." },
-  { icon: GitBranch, label: "Decide action", detail: "Based on the decline type and whether the payment method is a saved/recurring instrument, the agent picks one of two paths: silently retry the charge, or draft a customer-facing reminder." },
+  { icon: Search, label: "Detect decline", detail: "First, it looks at why the payment failed. Some failures are temporary, like a bank timeout, and can be fixed with a retry. Others are permanent, like an expired card, and no amount of retrying will help." },
+  { icon: GitBranch, label: "Decide action", detail: "Now it decides what to do. If the failure looks temporary and there is a saved card on file, it quietly tries the charge again. Otherwise, it writes a message to remind the customer instead." },
   { icon: ShieldCheck, label: "Compliance check", detail: "Before anything executes, the action is checked against hard rules: contact hours (8am–7pm IST), retry limits, opt-out status, whether the payment has a valid stored authorization to retry, and whether the amount requires human approval." },
-  { icon: Zap, label: "Execute", detail: "If allowed, the agent either triggers the retry or generates a short, polite reminder message via an LLM — never both, and never more than the compliance check allows." },
-  { icon: Activity, label: "Track outcome", detail: "The result — recovered, exhausted, escalated, blocked, or pending approval — is logged with full reasoning to the audit trail, which is what powers every row in the ledger below." },
+  { icon: Zap, label: "Execute", detail: "Once it gets the green light, it takes one action only, either the retry or the message, never both, and never anything beyond what was approved." },
+  { icon: Activity, label: "Track outcome", detail: "Whatever happens next, whether the payment gets recovered, escalated, or blocked, gets written down with the full reasoning behind it. That is exactly what you are seeing in the ledger below." },
 ];
 
 function curateSample(list, perStatus = 4, cap = 18) {
@@ -164,11 +164,12 @@ export default function App() {
       {view === "dashboard" ? (
         <div className="page">
           <header className="hero">
-            <h1>AI Revenue Recovery Agent</h1>
+            <h1>Recoverly</h1>
             <p className="subtitle">
-              Recoverly detects payment failures, understands why they happened,
-              and takes the right recovery action automatically — with every
-              decision logged and explainable.
+              When a payment fails, Recoverly finds out why it happened and does
+              something about it. It might retry the charge, send the customer a
+              reminder, or flag it for you to check. You can see the reasoning
+              behind every single decision it makes.
             </p>
             <div className="hero-actions">
               <button className="btn-primary" onClick={() => scrollTo(".ledger-header")}>
@@ -178,8 +179,8 @@ export default function App() {
                 Explore agent
               </button>
               <button className="btn-secondary" onClick={() => setView("approvals")}>
-                <ShieldAlert size={15} style={{ marginRight: 6 }} />
-                Approval Queue
+                <ShieldAlert size={16} style={{ marginRight: 6 }} />
+                waiting for approval-
                 {pendingApprovalCount > 0 && <span className="topbar-badge">{pendingApprovalCount}</span>}
               </button>
             </div>
@@ -190,7 +191,7 @@ export default function App() {
               <ShieldAlert size={16} />
               <span>
                 <strong>₹{dashboard.pending_approval_amount.toLocaleString("en-IN")}</strong> across{" "}
-                <strong>{dashboard.pending_approval_count}</strong> high-value payments waiting on human approval
+                <strong>{dashboard.pending_approval_count}</strong> payments is waiting on your approval right now
               </span>
               <ArrowRight size={15} />
             </div>
@@ -199,21 +200,21 @@ export default function App() {
           {dashboard && (
             <section className="metrics">
               <div className="metric-card">
-                <span className="metric-label">Amount recovered</span>
+                <span className="metric-label">Recovered so far</span>
                 <span className="metric-value mono">
                   ₹{dashboard.recovered_amount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
                 </span>
               </div>
               <div className="metric-card">
-                <span className="metric-label">Payments resolved</span>
+                <span className="metric-label">Payments handled</span>
                 <span className="metric-value mono">{dashboard.recovered_count}/{dashboard.total_payments}</span>
               </div>
               <div className="metric-card">
-                <span className="metric-label">Recovery rate</span>
+                <span className="metric-label">Success rate</span>
                 <span className="metric-value mono brand">{dashboard.recovery_rate_pct}%</span>
               </div>
               <div className="metric-card">
-                <span className="metric-label">Needs attention</span>
+                <span className="metric-label">Needs a look</span>
                 <span className="metric-value mono">{blockedCount + pendingApprovalCount}</span>
               </div>
             </section>
@@ -222,7 +223,7 @@ export default function App() {
           {showAgentFlow && (
             <section className="panel agent-flow-section">
               <h2>How the agent thinks</h2>
-              <p className="section-body">Click any step to see exactly what the agent checks and decides at that point.</p>
+              <p className="section-body">Tap on any step below to see what happens at that point and why.</p>
               <div className="flow-track">
                 {AGENT_STEPS.map((step, i) => (
                   <div className="flow-track-item" key={i}>

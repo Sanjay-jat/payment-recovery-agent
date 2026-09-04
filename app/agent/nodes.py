@@ -95,7 +95,7 @@ def compliance_gate(state: RecoveryState) -> dict:
     return {"action_allowed": True, "audit_log": state["audit_log"] + [log_line]}
 
 import random
-from app.llm import get_llm
+from app.llm import get_llm, extract_llm_text
 
 MESSAGE_PROMPT = """You are a polite payment reminder assistant for an Indian fintech.
 Write a short, respectful message (2-3 sentences) in natural Hinglish reminding the
@@ -130,7 +130,7 @@ def execute(state: RecoveryState) -> dict:
                 reason=DECLINE_CODES[state["decline_code"]]["description"],
             )
             response = llm.invoke(prompt)
-            message = response.content if hasattr(response, "content") else str(response)
+            message = extract_llm_text(response)
         except Exception as e:
             message = f"[LLM unavailable: {e}]"
         log_line = f"[execute] Message generated: {message[:80]}..."
