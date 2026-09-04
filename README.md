@@ -91,14 +91,17 @@ If there's no local LLM available (which is the case on a hosted version of the 
 
 <div align="center">
 
-![Dashboard overview](docs/screenshot-1.png)
-*The dashboard: recovery metrics and the payment stream at a glance*
+![Dashboard overview](docs/Dashboard.png)
+*Recoverly's dashboard: a live view of recovered amounts, success rate, and every payment as it moves through the recovery flow*
 
-![Approval queue](docs/screenshot-2.png)
+![Approval queue](docs/Approvals.png)
 *The approval queue, with a recovery probability score sitting next to each item*
 
-![Live simulator](docs/screenshot-3.png)
+![Live simulator](docs/Agent.png)
 *The simulator, mid-run, showing the agent's reasoning step by step*
+
+![Payments $ Recovery Activity](docs/Payments & Recovery.png)
+*Payments & Recovery: recovery metrics and the payment stream at a glance*
 
 </div>
 
