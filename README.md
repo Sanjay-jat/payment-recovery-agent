@@ -10,7 +10,7 @@
 [![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-**Live app:** [link here]  •  **API docs:** [link here]
+**Live app:** [payment-recovery-agent-j8szwylvt-sanjay05.vercel.app](https://payment-recovery-agent-j8szwylvt-sanjay05.vercel.app/)  •  **API docs:** [payment-recovery-agent-q9bi.onrender.com](https://payment-recovery-agent-q9bi.onrender.com/docs)
 
 </div>
 
