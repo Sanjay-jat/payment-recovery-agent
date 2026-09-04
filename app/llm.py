@@ -16,6 +16,6 @@ def get_llm(provider: str = "ollama", api_key: str | None = None):
         key = api_key or os.getenv("GEMINI_API_KEY")
         if not key:
             raise ValueError("No Gemini API key provided")
-        return ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=key)
+        return ChatGoogleGenerativeAI(model="gemini-3.5-flash", google_api_key=key)
 
     raise ValueError(f"Unknown provider: {provider}")
